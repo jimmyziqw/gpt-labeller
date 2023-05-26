@@ -19,17 +19,6 @@ print("Loading BERT tokenizer...")
 tokenizer = BertTokenizer.from_pretrained(
     "bert-base-uncased", do_lower_case=True)
 
-# def train_test_split(data, train_ratio=0.8):
-#     train_size = int(train_ratio * len(data))
-#     test_size = len(data)-train_size
-#     # train_data, test_data = random_split(data, [train_size, test_size])
-#     train_data = data[:train_size]
-#     test_data = data[train_size:]
-#     with open("train_data.json", "w") as f:
-#         json.dump(train_data, f)
-#     with open("test_data.json", "w") as f:
-#         json.dump(test_data, f)
-#     return train_data, test_data
  
 
 def flat_accuracy(preds, labels):
@@ -218,7 +207,7 @@ def model_fn(model_dir):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model_path = os.path.join(model_dir, 'model/')
     model = BertForSequenceClassification.from_pretrained(model_path)
-    print("================ model loaded ===========================")
+    print("model load")
     return model.to(device)
 
 
@@ -226,7 +215,7 @@ def input_fn(request_body, request_content_type):
     """An input_fn that loads a pickled tensor"""
     if request_content_type == "application/json":
         data = json.loads(request_body)
-        print("================ input sentences ===============")
+        print("input sentences")
         print(data)
 
         if isinstance(data, str):
@@ -240,7 +229,7 @@ def input_fn(request_body, request_content_type):
         input_ids = [tokenizer.encode(
             x, add_special_tokens=True) for x in data]
 
-        print("================ encoded sentences ==============")
+        print("encoded sentences ")
         print(input_ids)
 
         # pad shorter sentence
@@ -251,7 +240,7 @@ def input_fn(request_body, request_content_type):
         # create mask
         mask = (padded != 0)
 
-        print("================= padded input and attention mask ================")
+        print(" padded input and attention mask ")
         print(padded, '\n', mask)
 
         return padded.long(), mask.long()
@@ -267,11 +256,11 @@ def predict_fn(input_data, model):
     input_id, input_mask = input_data
     input_id = input_id.to(device)
     input_mask = input_mask.to(device)
-    print("============== encoded data =================")
+    print(" encoded data ")
     print(input_id, input_mask)
     with torch.no_grad():
         y = model(input_id, attention_mask=input_mask)[0]
-        print("=============== inference result =================")
+        print("inference result ")
         print(y)
     return y
 
